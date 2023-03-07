@@ -1,0 +1,20 @@
+* {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+
+}
+
+body {
+    margin: 20px;
+}
+
+.road {
+    background-color: #18ab8d;
+}
+
+.road-allow {
+    background-color: #b4b2f1;
+}
+
+.road-forbid {
+    background-color: #ec6d6d;
+}
