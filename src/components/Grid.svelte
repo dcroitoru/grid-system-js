@@ -1,150 +1,144 @@
 <script>
 	import { onMount } from 'svelte';
-	import Cell from './Cell.svelte';
-	import { clearGrid, createGrid, createRect, createRoad } from './grid';
-	import { canPlaceRoad } from './roads';
-	import { max } from './util';
 
-	const w = 10;
-	const h = 10;
+	import { drawGrid, setContext, worldToGrid } from './canvas';
+	import { createGrid, createRect } from './grid';
+	import { createRoads } from './roads';
+	import { posEqual, throttle, toXY } from './util';
 
-	let grid = createGrid(w, h);
-	let startCell, endCell;
+	let canvas;
+	let context;
+	let grid;
 
-	let ghostRoads = [];
+	let startCell, endCell, currentCell;
+	let dragActive = false;
 
-	grid[0][0].data = { road: true };
-
-	const createGhostRoadData = (cell) => {
-		const { x, y, data, id } = cell;
-		if (canPlaceRoad(cell)) {
-			return {
-				...data,
-				allow: true,
-				forbid: false
-			};
-		} else {
-			return {
-				...data,
-				allow: true,
-				forbid: false
-			};
-		}
-
-		// ghostRoads.push(cell);
-
-		// grid = [...grid];
-	};
-
-	const clearGhostRoads = () => {
-		ghostRoads.map(({ x, y, data }) => {
-			console.log(x, y, data)
-			if (data?.road) {
-				grid[y][x].data = { road: true };
-			} else {
-				grid[y][x].data = null;
-			}
-		});
-		ghostRoads = [];
-		// grid.map((row) =>
-		// 	row.map((cell) => {
-		// 		const { x, y, data } = cell;
-		// 		grid[y][x].data = { ...data, allow: false, forbid: false };
-		// 	})
-		// );
-	};
-
-	const onOver = (cell) => {
-		endCell = cell;
-
-		if (startCell) {
-			clearGhostRoads();
-			const rect = createRect(startCell, endCell);
-
-			rect.map(([x, y]) => {
-				grid[y][x].data = { allow: true };
-				ghostRoads.push(grid[y][x]);
-			});
-		} else {
-			const { x, y } = cell;
-			grid[y][x].data = { allow: true };
-			ghostRoads.push(cell);
-		}
-	};
-
-	const onOut = (cell) => {
-		// clearGhostRoads();
-		if (startCell) {
-		} else {
-			clearGhostRoads();
-		}
-	};
-
-	const onStart = (cell) => {
-		startCell = cell;
-
-		console.log('startdrag', cell);
-	};
-
-	const onEnd = () => {
-		if (!startCell || !endCell) return;
-
-		console.log('enddrag', endCell);
-
-		const rect = createRect(startCell, endCell);
-
-		rect.map(([x, y]) => {
-			grid[y][x].data = { road: true };
-		});
-
-		// if (canPlaceRoad(cell)) {
-		// 	const interval = createInterval(startCell.x, endCell.x);
-		// 	const segment = createSegmentX(interval, startCell.y);
-		// 	segment.map(([x, y]) => {
-		// 		grid[y][x].road = true;
-		// 	});
-		// }
-
-		clearGhostRoads();
-
-		startCell = null;
-		endCell = null;
-	};
+	const canvasSize = 700;
+	const cellSize = 70;
+	const gridSize = 10;
 
 	onMount(() => {
-		window.addEventListener('mouseup', onEnd);
+		context = canvas.getContext('2d');
+		setContext(context, canvasSize, gridSize, cellSize);
+
+		grid = createGrid(gridSize, gridSize);
+		drawGrid(grid);
 	});
 
-	const onClearGrid = () => {
-		grid = [...clearGrid(grid)];
+	const highlightedSet = new Set();
+	const gridSet = new Set();
+	let highlighted = [];
+
+	const draw = () => {
+		drawGrid(grid);
 	};
+
+	const onMouseMove = (event) => {
+		const pos = worldToGrid(event);
+
+		// if (!startCell) {
+		// 	clearHighlighted();
+		// }
+
+		if (pos) {
+			pos && onCellEnter(pos);
+
+			// console.log('should clear highlight ');
+			// highlighted.filter(posEqual).map(onCellExit);
+		} else {
+		}
+	};
+
+	const onMouseDown = (event) => {
+		const { x, y } = worldToGrid(event);
+
+		startCell = grid[y][x];
+		dragActive = true;
+
+		// grid[y][x].data = { road: true };
+
+		// draw();
+	};
+
+	const onMouseUp = (event) => {
+		if (dragActive) {
+			console.log('should create selection area', startCell, currentCell);
+
+			createRoads(grid)(highlighted);
+			clearHighlighted();
+			draw();
+
+			dragActive = false;
+			startCell = null;
+			currentCell = null;
+		}
+	};
+
+	const onMouseLeave = (event) => {
+		currentCell && unhighlightCell(currentCell);
+
+		currentCell = null;
+
+		draw();
+	};
+
+	const clearHighlighted = () => {
+		highlighted.map(unhighlightCell);
+
+		highlighted = [];
+
+		console.log(grid);
+	};
+
+	const unhighlightCell = ({ x, y }) => {
+		if (!grid[y][x].data?.allow) return;
+		grid[y][x].data = {
+			...grid[y][x].data,
+			allow: false
+		};
+		highlightedSet.delete(grid[y][x].id);
+	};
+
+	const highlightCell = ({ x, y }) => {
+		if (grid[y][x].data?.allow) return;
+		grid[y][x].data = {
+			...grid[y][x].data,
+			allow: true
+		};
+		highlightedSet.add(grid[y][x].id);
+	};
+
+	const onCellEnter = (cell) => {
+		if (currentCell?.x == cell.x && currentCell?.y == cell.y) return;
+
+		if (dragActive) {
+			const rect = createRect(startCell, cell);
+			highlighted.map(unhighlightCell);
+			highlighted = rect.map(toXY);
+			highlighted.map(highlightCell);
+			draw();
+		} else {
+			if (currentCell) {
+				unhighlightCell(currentCell);
+			}
+
+			highlightCell(cell);
+		}
+		currentCell = cell;
+
+		draw();
+	};
+
+	const onCellExit = (cell) => {};
 </script>
 
-<div class="grid">
-	{#each grid as row}
-		{#each row as cell}
-			<Cell
-				{cell}
-				on:over-cell={() => onOver(cell)}
-				on:out-cell={() => onOut(cell)}
-				on:start-cell={() => onStart(cell)}
-			/>
-		{/each}
-	{/each}
-</div>
-
-<button on:click={() => onClearGrid()}>Clear</button>
-
-<style>
-	:root {
-		--cell-size: 70px;
-	}
-
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(10, var(--cell-size));
-		grid-template-rows: repeat(10, var(--cell-size));
-		column-gap: 2px;
-		row-gap: 2px;
-	}
-</style>
+<canvas
+	bind:this={canvas}
+	width={canvasSize}
+	height={canvasSize}
+	style="width: {canvasSize}px; height: {canvasSize}px;"
+	on:mousemove={(e) => onMouseMove(e)}
+	on:mousedown={(e) => onMouseDown(e)}
+	on:mouseup={(e) => onMouseUp(e)}
+	on:mouseleave={(e) => onMouseLeave(e)}
+/>

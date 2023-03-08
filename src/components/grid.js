@@ -19,45 +19,8 @@ export const createGrid = (w, h) => {
 };
 
 export const clearGrid = (grid) => {
-	return grid.map((row) =>
-		row.map((cell) => ({ ...cell, data: null }))
-	);
+	return grid.map((row) => row.map((cell) => ({ ...cell, data: null })));
 };
-
-export const calcNeighbours = (grid) => (i, j) => {
-	const gridValue = value(grid);
-	const tl = extend(i, j, -1, -1);
-	const tlValue = tl.map(gridValue).reduce(sum);
-	const tr = extend(i, j, 1, -1);
-	const trValue = tr.map(gridValue).reduce(sum);
-	const bl = extend(i, j, -1, 1);
-	const blValue = bl.map(gridValue).reduce(sum);
-	const br = extend(i, j, 1, 1);
-	const brValue = br.map(gridValue).reduce(sum);
-
-	return [tlValue, trValue, blValue, brValue];
-};
-
-export const createRoad =
-	(grid) =>
-	(roadData, v = 1) => {
-		roadData.forEach(([x, y]) => {
-			grid[y][x].value = v;
-			const s = calcNeighbours(grid)(x, y);
-			grid[y][x].s = s;
-			if (v == 2) {
-				const forbid = s.filter((v) => v >= 3).length;
-
-				if (forbid) {
-					grid[y][x].value = 3;
-					grid[y][x].forbid = true;
-				} else {
-					grid[y][x].value = 2;
-					grid[y][x].allow = true;
-				}
-			}
-		});
-	};
 
 export const createInterval = (x0, x1) => {
 	let arr = [];
