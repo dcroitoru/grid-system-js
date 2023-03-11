@@ -9,13 +9,28 @@ height.subscribe((_h) => (h = _h));
 gs.subscribe((v) => (gridSize = v));
 cs.subscribe((v) => (cellSize = v));
 
+const green = '#06d6a0';
+const blue = '#118ab2';
+const darkBlue = '#073b4c';
+const lightBlue = '#cbf3f0';
+const yellow = '#ffd166';
+
 const colors = {
 	default: '#c4f8f8',
 	background: '#fff',
-	road: '#18ab8d',
-	allow: '#b4b2f1',
-	forbid: '#ec6d6d'
+	highlight: '#b4b2f1',
+	road: blue,
+	house: yellow,
+	tree: green
 };
+
+// const colors = {
+// 	default: '#c4f8f8',
+// 	background: '#fff',
+// 	road: '#18ab8d',
+// 	allow: '#b4b2f1',
+// 	forbid: '#ec6d6d'
+// };
 
 export const clear = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -46,8 +61,10 @@ export const drawGrid = () => {
 
 const getCellColor = (cell) => {
 	if (!cell.data) return colors.default;
-	if (cell.data.allow) return colors.allow;
+	if (cell.data.highlight) return colors.highlight;
 	if (cell.data.road) return colors.road;
+	if (cell.data.tree) return colors.tree;
+	if (cell.data.house) return colors.house;
 	return colors.default;
 };
 
@@ -70,7 +87,6 @@ export const draw = (grid, data) => {
 
 	// console.log('should draw grid', grid, data);
 
-	
 	[...grid]
 		.map(strToArr)
 		.map(toXY)

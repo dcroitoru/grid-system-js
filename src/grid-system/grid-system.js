@@ -1,7 +1,17 @@
 import { writable } from 'svelte/store';
-import { createRect } from '../components/grid';
-import { id, posEqual, strToArr, strToXY, toID, toXY } from '../components/util';
-import { highlightGrid, roadsGrid } from './grid';
+import {
+	createHalfPerimeter,
+	createPerimeter,
+	createRect,
+	id,
+	posEqual,
+	strToArr,
+	strToXY,
+	toID,
+	toXY
+} from '../components/util';
+import { highlightGrid, housesGrid, roadsGrid, treesGrid } from './grid';
+import { createHighlight, currentTool, tools } from './tools-system';
 
 export const actions = {
 	startSelection: 'startSelection',
@@ -11,12 +21,23 @@ export const actions = {
 	clear: 'clear'
 };
 
+let tool;
+currentTool.subscribe((v) => (tool = v));
+
+const flip = (first, second) => first.x !== second.x;
+
+const getHighlightData = (start, next, pos, tool) => {
+	const shouldFlip = flip(strToXY(start), strToXY(next));
+	const fn = createHighlight(tool);
+	const highlight = fn(strToXY(start), pos, shouldFlip).map(toID);
+	return highlight;
+};
+
 const createGridSystem = (w, h, gridSize) => {
 	const { subscribe, set, update } = writable();
 	let current;
-	let start = '';
-	let end;
-	let tempHighlight = [];
+	let start;
+	let next;
 
 	const handleEvent = (type, payload) => {
 		const reducer =
@@ -32,17 +53,14 @@ const createGridSystem = (w, h, gridSize) => {
 
 		const posId = id(pos);
 		if (posId === current) return;
-
-		/**
-		 * based on current, and selected tool, should update grid;
-		 * if start selection is false, should clear selection
-		 */
-
 		if (start) {
+			!next && (next = posId);
+
+			console.log(start, next);
+
 			highlightGrid.clear();
-			const area = createRect(strToXY(start), pos);
-			tempHighlight = area.map(toID);
-			highlightGrid.set(tempHighlight, true);
+			const highlight = getHighlightData(start, next, pos, tool);
+			highlightGrid.set(highlight, true);
 		} else {
 			current && highlightGrid.set([current], false);
 			highlightGrid.set([posId], true);
@@ -55,19 +73,19 @@ const createGridSystem = (w, h, gridSize) => {
 	};
 
 	const stopSelection = (pos) => {
-		end = id(pos);
-
 		if (!start) return;
 
-		console.log('should create permanent', tempHighlight);
+		const highlight = getHighlightData(start, next || start, pos, tool);
 
-		roadsGrid.set(tempHighlight);
+		console.log(highlight);
 
+		tool == tools.road && roadsGrid.set(highlight);
+		tool == tools.trees && treesGrid.set(highlight);
+		tool == tools.house && housesGrid.set(highlight);
 		highlightGrid.clear();
 
 		start = null;
-		end = null;
-		tempHighlight = [];
+		next = null;
 	};
 
 	const cancel = () => {
@@ -79,9 +97,11 @@ const createGridSystem = (w, h, gridSize) => {
 	const clear = () => {
 		current = null;
 		start = null;
-		tempHighlight = null;
+
 		highlightGrid.clear();
 		roadsGrid.clear();
+		housesGrid.clear();
+		treesGrid.clear();
 	};
 
 	const reducers = {
@@ -102,3 +122,4 @@ const createGridSystem = (w, h, gridSize) => {
 };
 
 export const gridSystem = createGridSystem();
+export const dispatch = gridSystem.dispatch;

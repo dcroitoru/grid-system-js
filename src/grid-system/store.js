@@ -14,6 +14,7 @@ export const cellSize = writable(cs);
 export const context = writable();
 export const canvas = writable();
 
+
 // export const grid = derived(context, (c, set) => {
 // 	console.log('deriving from context', c);
 

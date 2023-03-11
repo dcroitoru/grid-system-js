@@ -39,15 +39,6 @@ export function throttle(cb, delay = 100) {
 	};
 }
 
-export const createRect = (p0, p1) => {
-	const xInterval = createInterval(p0.x, p1.x);
-	const yInterval = createInterval(p0.y, p1.y);
-
-	const ySegments = yInterval.map((y) => createSegmentOnX(xInterval, y));
-	const arr = ySegments.flat(1);
-	return arr;
-};
-
 export const createInterval = (x0, x1) => {
 	let arr = [];
 
@@ -60,6 +51,45 @@ export const createInterval = (x0, x1) => {
 	return arr;
 };
 
-
 export const createSegmentOnX = (interval, y) => interval.map((x) => [x, y]);
 export const createSegmentOnY = (interval, x) => interval.map((y) => [x, y]);
+
+export const createRect = (p0, p1) => {
+	const xInterval = createInterval(p0.x, p1.x);
+	const yInterval = createInterval(p0.y, p1.y);
+
+	const ySegments = yInterval.map((y) => createSegmentOnX(xInterval, y));
+	const arr = ySegments.flat(1);
+	return arr;
+};
+
+export const createPerimeter = (p0, p1) => {
+	const xInterval = createInterval(p0.x, p1.x);
+	const yInterval = createInterval(p0.y, p1.y);
+
+	const arr = [
+		createSegmentOnX(xInterval, p0.y),
+		createSegmentOnY(yInterval, p1.x),
+		createSegmentOnX(xInterval, p1.y),
+		createSegmentOnY(yInterval, p0.x)
+	];
+
+	return arr.flat(1);
+};
+
+export const createHalfPerimeter = (p0, p1, flip = false) => {
+
+	console.log('should create half perimeter', p0, p1, flip)
+
+	const xInterval = createInterval(p0.x, p1.x);
+	const yInterval = createInterval(p0.y, p1.y);
+
+	const arr = flip
+		? [createSegmentOnX(xInterval, p0.y), createSegmentOnY(yInterval, p1.x)]
+		: [createSegmentOnY(yInterval, p0.x), createSegmentOnX(xInterval, p1.y)];
+	return arr.flat(1);
+};
+
+const p = createHalfPerimeter({ x: 0, y: 0 }, { x: 2, y: 2 }, false);
+
+console.log(p);

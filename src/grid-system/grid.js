@@ -23,17 +23,15 @@ const createGrid = (name, w, h, gridSize) => {
 	const clear = (newValue = []) => update(() => new Set(newValue));
 
 	const value = () => {
-		
-		console.log('should return ', name, hash)
+		console.log('should return ', name, hash);
 
 		return [...hash];
-
-	} 
+	};
 
 	return { subscribe, set, get, clear, value };
 };
 
 export const highlightGrid = createGrid('highlight');
 export const roadsGrid = createGrid('roads');
-
-
+export const treesGrid = createGrid('trees');
+export const housesGrid = createGrid('houses');

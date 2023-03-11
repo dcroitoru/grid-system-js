@@ -3,7 +3,7 @@
 
 	import { draw, drawGrid, worldToGrid } from './canvas.js';
 	import { actions, gridSystem } from './grid-system.js';
-	import { highlightGrid, roadsGrid } from './grid.js';
+	import { highlightGrid, housesGrid, roadsGrid, treesGrid } from './grid.js';
 	import { width, height, canvas as canvasStore, context as contextStore } from './store.js';
 
 	let canvas;
@@ -18,11 +18,16 @@
 		contextStore.set(context);
 	});
 
+	/**
+	 * Render
+	 */
 	$: {
 		if ($highlightGrid && context) {
 			drawGrid();
+			draw($housesGrid, { house: true });
+			draw($treesGrid, { tree: true });
 			draw($roadsGrid, { road: true });
-			draw($highlightGrid, { allow: true });
+			draw($highlightGrid, { highlight: true });
 		}
 	}
 
@@ -45,10 +50,6 @@
 		dispatch(actions.cancel);
 	};
 
-	const clear = () => {
-		dispatch(actions.clear);
-	};
-
 	const onKeyPress = (event) => {
 		if (event.key === 'Escape') {
 			dispatch(actions.cancel);
@@ -67,15 +68,3 @@
 	on:mouseleave={onMouseLeave}
 />
 <svelte:window on:keydown={onKeyPress} />
-
-<button on:click={clear}>clear</button>
-
-<h3>Highlights</h3>
-<div>
-	{[...$highlightGrid]}
-</div>
-
-<h3>Permanent</h3>
-<div>
-	{[...$roadsGrid]}
-</div>
