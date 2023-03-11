@@ -5,6 +5,18 @@ export const posEqual = (p1, p2) => p1.x == p2.x && p1.y == p2.y;
 export const id = ({ x, y }) => `${x}-${y}`;
 
 export const toXY = ([x, y]) => ({ x, y });
+export const toID = ([x, y]) => `${x}-${y}`;
+
+// @ts-ignore
+export const strToArr = (str = '') => {
+	const [x, y] = str.split('-').map(Number);
+	return [x, y];
+};
+
+export const strToXY = (str = '') => {
+	const [x, y] = str.split('-').map(Number);
+	return { x, y };
+};
 
 export const extend = (x, y, a, b) => [
 	[x + a, y],
@@ -27,23 +39,27 @@ export function throttle(cb, delay = 100) {
 	};
 }
 
-// export const throttle = (func, limit) => {
-// 	let lastFunc;
-// 	let lastRan;
-// 	return function () {
-// 		const context = this;
-// 		const args = arguments;
-// 		if (!lastRan) {
-// 			func.apply(context, args);
-// 			lastRan = Date.now();
-// 		} else {
-// 			clearTimeout(lastFunc);
-// 			lastFunc = setTimeout(function () {
-// 				if (Date.now() - lastRan >= limit) {
-// 					func.apply(context, args);
-// 					lastRan = Date.now();
-// 				}
-// 			}, limit - (Date.now() - lastRan));
-// 		}
-// 	};
-// };
+export const createRect = (p0, p1) => {
+	const xInterval = createInterval(p0.x, p1.x);
+	const yInterval = createInterval(p0.y, p1.y);
+
+	const ySegments = yInterval.map((y) => createSegmentOnX(xInterval, y));
+	const arr = ySegments.flat(1);
+	return arr;
+};
+
+export const createInterval = (x0, x1) => {
+	let arr = [];
+
+	const sign = Math.sign(x1 - x0) || 1;
+	const len = Math.abs(x1 - x0 + sign);
+	for (let i = 0; i < len; i++) {
+		arr.push(x0 + i * sign);
+	}
+
+	return arr;
+};
+
+
+export const createSegmentOnX = (interval, y) => interval.map((x) => [x, y]);
+export const createSegmentOnY = (interval, x) => interval.map((y) => [x, y]);

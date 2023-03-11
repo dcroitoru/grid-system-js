@@ -1,0 +1,6 @@
+<div>
+
+    <a href="v1">v1</a>
+    <a href="v2">v2</a>
+</div>
+<slot/>

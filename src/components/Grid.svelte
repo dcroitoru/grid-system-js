@@ -4,13 +4,13 @@
 	import { drawGrid, setContext, worldToGrid } from './canvas';
 	import { createGrid, createRect } from './grid';
 	import { createRoads } from './roads';
-	import { posEqual, throttle, toXY } from './util';
+	import { toXY } from './util';
 
 	let canvas;
 	let context;
 	let grid;
 
-	let startCell, endCell, currentCell;
+	let startCell, currentCell;
 	let dragActive = false;
 
 	const canvasSize = 700;

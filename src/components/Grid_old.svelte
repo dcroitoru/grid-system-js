@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import Cell from './Cell.svelte';
-	import { clearGrid, createGrid, createRect, createRoad } from './grid';
+	import { clearGrid, createGrid, createRect } from './grid';
 	import { canPlaceRoad } from './roads';
 	import { max } from './util';
 
@@ -38,7 +38,7 @@
 
 	const clearGhostRoads = () => {
 		ghostRoads.map(({ x, y, data }) => {
-			console.log(x, y, data)
+			console.log(x, y, data);
 			if (data?.road) {
 				grid[y][x].data = { road: true };
 			} else {
