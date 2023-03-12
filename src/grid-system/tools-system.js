@@ -15,3 +15,14 @@ const highlightMapFn = {
 };
 
 export const createHighlight = (tool) => highlightMapFn[tool] || createRect;
+
+const rulesDeny = {
+	[tools.trees]: [tools.road, tools.house],
+	[tools.road]: [tools.house],
+	[tools.house]: []
+};
+
+export const canBuildWithToolOverCell = (buildWith) => buildOver => !rulesDeny[buildWith]?.includes(buildOver);
+
+// console.log('===apply rule');
+// console.log(canBuild(tools.road)(tools.road));

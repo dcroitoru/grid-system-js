@@ -19,7 +19,8 @@ const yellow = '#ffd166';
 const colors = {
 	default: '#c4f8f8',
 	background: '#fff',
-	highlight: '#b4b2f1',
+	'highlight-allow': '#b4b2f1',
+	'highlight-deny': '#ff7d7d',
 	[tools.road]: blue,
 	[tools.house]: yellow,
 	[tools.trees]: green,
@@ -43,8 +44,8 @@ export const drawRect = (x, y, w, h, color = colors.background) => {
 	ctx.fillRect(x, y, w, h);
 };
 
-export const drawText = (x, y, text) => {
-	ctx.font = 'lighter 8px Trebuchet MS';
+export const drawText = (x, y, text, fontSize = 8) => {
+	ctx.font = `lighter ${fontSize}px Trebuchet MS`;
 	ctx.strokeText(text, x, y);
 };
 
@@ -76,6 +77,8 @@ export const drawCell = (cell) => {
 	drawRect(x, y, cellSize, cellSize);
 	drawRect(x + b, y + b, cellSize - 2 * b, cellSize - 2 * b, color);
 	drawText(x + cellSize / 2 - 5, y + 15, `${cell.x},${cell.y}`);
+
+	color === colors['highlight-deny'] && drawText(x+21, y + 50, '❌', 20);
 };
 
 /**

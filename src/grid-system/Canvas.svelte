@@ -37,6 +37,9 @@
 		const pos = worldToGrid(event);
 
 		if (!pos) return;
+
+		// dispatch(actions.setCurrent, pos);
+
 		!posEqual(pos, lastPos) && dispatch(actions.setCurrent, pos);
 		lastPos = pos;
 	};
@@ -53,6 +56,7 @@
 
 	const onMouseLeave = (event) => {
 		dispatch(actions.cancel);
+		
 	};
 
 	const onKeyPress = (event) => {
