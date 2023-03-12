@@ -1,8 +1,10 @@
 <script>
+	import { actions, dispatch } from './actions';
 	import Canvas from './Canvas.svelte';
-	import { highlightGrid, housesGrid, roadsGrid, treesGrid } from './grid';
-	import { actions, dispatch } from './grid-system';
+	import { highlightGrid, housesGrid, persistentGrid, roadsGrid, treesGrid } from './grid';
 	import Tools from './Tools.svelte';
+	import { gridSystem } from './grid-system';
+	
 
 	setTimeout(() => {
 		// drawGrid();
@@ -11,6 +13,8 @@
 	}, 1000);
 
 	const clear = () => {
+		console.log('should dispatch clear action');
+
 		dispatch(actions.clear);
 	};
 </script>
@@ -20,26 +24,14 @@
 <Canvas />
 <Tools />
 
-
-
 <button on:click={clear}>clear</button>
 
-<h3>Highlights</h3>
+<h3>Highlight</h3>
 <div>
 	[{[...$highlightGrid]}]
 </div>
 
-<h3>Roads</h3>
+<h3>Persistent</h3>
 <div>
-	{[...$roadsGrid]}
-</div>
-
-<h3>Trees</h3>
-<div>
-	{[...$treesGrid]}
-</div>
-
-<h3>Houses</h3>
-<div>
-	{[...$housesGrid]}
+	[{[...$persistentGrid]}]
 </div>

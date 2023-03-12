@@ -1,15 +1,15 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
+	import { actions, dispatch } from './actions.js';
 
 	import { draw, drawGrid, worldToGrid } from './canvas.js';
-	import { actions, gridSystem } from './grid-system.js';
-	import { highlightGrid, housesGrid, roadsGrid, treesGrid } from './grid.js';
+
+	import { highlightGrid, housesGrid, persistentGrid, roadsGrid, treesGrid } from './grid.js';
 	import { width, height, canvas as canvasStore, context as contextStore } from './store.js';
+	import { posEqual } from './util.js';
 
 	let canvas;
 	let context;
-
-	const dispatch = gridSystem.dispatch;
 
 	onMount(() => {
 		// prepare canvas stores
@@ -24,16 +24,21 @@
 	$: {
 		if ($highlightGrid && context) {
 			drawGrid();
-			draw($housesGrid, { house: true });
-			draw($treesGrid, { tree: true });
-			draw($roadsGrid, { road: true });
-			draw($highlightGrid, { highlight: true });
+			// draw($housesGrid, { house: true });
+			draw($persistentGrid);
+			// draw($roadsGrid, { road: true });
+			draw($highlightGrid);
 		}
 	}
 
+	let lastPos = {};
+
 	const onMouseMove = (event) => {
 		const pos = worldToGrid(event);
-		pos && dispatch(actions.setCurrent, pos);
+
+		if (!pos) return;
+		!posEqual(pos, lastPos) && dispatch(actions.setCurrent, pos);
+		lastPos = pos;
 	};
 
 	const onMouseDown = (event) => {

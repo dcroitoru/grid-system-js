@@ -4,7 +4,7 @@
 	import { drawGrid, setContext, worldToGrid } from './canvas';
 	import { createGrid, createRect } from './grid';
 	import { createRoads } from './roads';
-	import { toXY } from './util';
+	import { toXY } from '../grid-system/util';
 
 	let canvas;
 	let context;

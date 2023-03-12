@@ -1,6 +1,6 @@
 export const sum = (a, b) => a + b;
 export const max = (a, b) => (a > b ? a : b);
-export const posEqual = (p1, p2) => p1.x == p2.x && p1.y == p2.y;
+export const posEqual = (p1 = {}, p2 = {}) => p1.x == p2.x && p1.y == p2.y;
 
 export const id = ({ x, y }) => `${x}-${y}`;
 
@@ -78,9 +78,6 @@ export const createPerimeter = (p0, p1) => {
 };
 
 export const createHalfPerimeter = (p0, p1, flip = false) => {
-
-	console.log('should create half perimeter', p0, p1, flip)
-
 	const xInterval = createInterval(p0.x, p1.x);
 	const yInterval = createInterval(p0.y, p1.y);
 
@@ -89,7 +86,3 @@ export const createHalfPerimeter = (p0, p1, flip = false) => {
 		: [createSegmentOnY(yInterval, p0.x), createSegmentOnX(xInterval, p1.y)];
 	return arr.flat(1);
 };
-
-const p = createHalfPerimeter({ x: 0, y: 0 }, { x: 2, y: 2 }, false);
-
-console.log(p);

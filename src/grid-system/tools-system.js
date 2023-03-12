@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { createHalfPerimeter, createRect } from '../components/util';
+import { createHalfPerimeter, createRect } from './util';
 
 export const tools = {
 	road: 'road',

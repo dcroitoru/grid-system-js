@@ -2,7 +2,7 @@
 // roads.map((road) => createGridRoad(road));
 
 import { value } from './grid';
-import { extend, max, sum } from './util';
+import { extend, max, sum } from '../grid-system/util';
 
 // const newRoads = [createSegment(0, 1, 6), createSegment(1, 2, 4, true)];
 // newRoads.map((road) => createGridRoad(road, 2));

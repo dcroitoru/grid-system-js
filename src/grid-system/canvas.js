@@ -1,5 +1,6 @@
-import { id, strToArr, toXY } from '../components/util';
+import { id, strToArr, toXY } from './util';
 import { context, height, width, gridSize as gs, cellSize as cs } from './store';
+import { tools } from './tools-system';
 
 let ctx, w, h, gridSize, cellSize;
 
@@ -19,9 +20,10 @@ const colors = {
 	default: '#c4f8f8',
 	background: '#fff',
 	highlight: '#b4b2f1',
-	road: blue,
-	house: yellow,
-	tree: green
+	[tools.road]: blue,
+	[tools.house]: yellow,
+	[tools.trees]: green,
+	unknown: 'red'
 };
 
 // const colors = {
@@ -61,11 +63,7 @@ export const drawGrid = () => {
 
 const getCellColor = (cell) => {
 	if (!cell.data) return colors.default;
-	if (cell.data.highlight) return colors.highlight;
-	if (cell.data.road) return colors.road;
-	if (cell.data.tree) return colors.tree;
-	if (cell.data.house) return colors.house;
-	return colors.default;
+	return colors[cell.data] || colors.unknown;
 };
 
 export const drawCell = (cell) => {
@@ -80,15 +78,18 @@ export const drawCell = (cell) => {
 	drawText(x + cellSize / 2 - 5, y + 15, `${cell.x},${cell.y}`);
 };
 
+/**
+ * Transforms
+ * [key, value] => {x, y, data}
+ */
+const createCellData = ([key, value]) => {
+	// @ts-ignore
+	const { x, y } = toXY(strToArr(key));
+	const data = value;
+	const color = getCellColor(value);
+	return { x, y, data, color };
+};
+
 export const draw = (grid, data) => {
-	// console.log('should draw grid', [...grid].map(toXY2))
-
-	// Object.values(grid).map(drawCell);
-
-	// console.log('should draw grid', grid, data);
-
-	[...grid]
-		.map(strToArr)
-		.map(toXY)
-		.map((cell) => drawCell({ ...cell, data }));
+	[...grid].map(createCellData).map(drawCell);
 };

@@ -1,4 +1,4 @@
-import { extend, id, sum } from './util';
+import { extend, id, sum } from '../grid-system/util';
 
 export const createGrid = (w, h) => {
 	const grid = [];

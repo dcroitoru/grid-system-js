@@ -1,52 +1,28 @@
-import { writable } from 'svelte/store';
-import {
-	createHalfPerimeter,
-	createPerimeter,
-	createRect,
-	id,
-	posEqual,
-	strToArr,
-	strToXY,
-	toID,
-	toXY
-} from '../components/util';
-import { highlightGrid, housesGrid, roadsGrid, treesGrid } from './grid';
+import { id, strToXY, toID } from './util';
+import { channel, type Action } from './actions';
+import { highlightGrid, housesGrid, persistentGrid, roadsGrid, treesGrid } from './grid';
 import { createHighlight, currentTool, tools } from './tools-system';
-
-export const actions = {
-	startSelection: 'startSelection',
-	stopSelection: 'stopSelection',
-	cancel: 'cancel',
-	setCurrent: 'setCurrent',
-	clear: 'clear'
-};
 
 let tool;
 currentTool.subscribe((v) => (tool = v));
 
+const highlightType = 'highlight';
+
 const flip = (first, second) => first.x !== second.x;
+
+const withValue = (value) => (key) => [key, value];
 
 const getHighlightData = (start, next, pos, tool) => {
 	const shouldFlip = flip(strToXY(start), strToXY(next));
 	const fn = createHighlight(tool);
 	const highlight = fn(strToXY(start), pos, shouldFlip).map(toID);
-	return highlight;
+	return highlight.map(withValue(highlightType));
 };
 
-const createGridSystem = (w, h, gridSize) => {
-	const { subscribe, set, update } = writable();
+const createGridSystem = () => {
 	let current;
 	let start;
 	let next;
-
-	const handleEvent = (type, payload) => {
-		const reducer =
-			reducers[type] ||
-			(() => {
-				console.log('no reducer for action', type);
-			});
-		reducer(payload);
-	};
 
 	const setCurrent = (pos) => {
 		if (!pos) return;
@@ -55,15 +31,12 @@ const createGridSystem = (w, h, gridSize) => {
 		if (posId === current) return;
 		if (start) {
 			!next && (next = posId);
-
-			console.log(start, next);
-
 			highlightGrid.clear();
 			const highlight = getHighlightData(start, next, pos, tool);
-			highlightGrid.set(highlight, true);
+			highlightGrid.set(highlight);
 		} else {
-			current && highlightGrid.set([current], false);
-			highlightGrid.set([posId], true);
+			current && highlightGrid.remove([[current]]);
+			highlightGrid.set([[posId, highlightType]]);
 		}
 		current = posId;
 	};
@@ -79,9 +52,9 @@ const createGridSystem = (w, h, gridSize) => {
 
 		console.log(highlight);
 
-		tool == tools.road && roadsGrid.set(highlight);
-		tool == tools.trees && treesGrid.set(highlight);
-		tool == tools.house && housesGrid.set(highlight);
+		persistentGrid.set(highlight.map(([key]) => [key, tool]));
+		// tool == tools.road && roadsGrid.set(highlight);
+		// tool == tools.house && housesGrid.set(highlight);
 		highlightGrid.clear();
 
 		start = null;
@@ -99,9 +72,7 @@ const createGridSystem = (w, h, gridSize) => {
 		start = null;
 
 		highlightGrid.clear();
-		roadsGrid.clear();
-		housesGrid.clear();
-		treesGrid.clear();
+		persistentGrid.clear();
 	};
 
 	const reducers = {
@@ -112,14 +83,17 @@ const createGridSystem = (w, h, gridSize) => {
 		clear
 	};
 
-	const dispatch = (type, payload) => {
-		// console.log('should dispatch', type, payload);
-
-		handleEvent(type, payload);
+	const handleAction = (action: Action = { type: 'init' }) => {
+		const { type, payload } = action;
+		const reducer =
+			reducers[type] ||
+			(() => {
+				console.warn('no reducer for action', type);
+			});
+		reducer(payload);
 	};
 
-	return { subscribe, dispatch };
+	channel.subscribe(handleAction);
 };
 
 export const gridSystem = createGridSystem();
-export const dispatch = gridSystem.dispatch;
