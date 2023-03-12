@@ -22,7 +22,10 @@ const rulesDeny = {
 	[tools.house]: []
 };
 
-export const canBuildWithToolOverCell = (buildWith) => buildOver => !rulesDeny[buildWith]?.includes(buildOver);
+export const canBuildWithToolOverCell = (buildWith) => (buildOver) => {
+	console.log('can build with', buildWith, 'over', buildOver);
+	return !rulesDeny[buildWith]?.includes(buildOver);
+};
 
 // console.log('===apply rule');
 // console.log(canBuild(tools.road)(tools.road));

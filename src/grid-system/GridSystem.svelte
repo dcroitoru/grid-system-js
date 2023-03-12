@@ -4,7 +4,8 @@
 	import { highlightGrid, housesGrid, persistentGrid, roadsGrid, treesGrid } from './grid';
 	import Tools from './Tools.svelte';
 	import { gridSystem } from './grid-system';
-	
+	import Legend from './Legend.svelte';
+	import Rules from './Rules.svelte';
 
 	setTimeout(() => {
 		// drawGrid();
@@ -19,8 +20,13 @@
 	};
 </script>
 
-<h1>Grid System v2</h1>
+<div class="columns">
+	<div>
+		<h1>Grid System v2</h1>
+	</div>
 
+	<Rules />
+</div>
 <Canvas />
 <Tools />
 
@@ -35,3 +41,11 @@
 <div>
 	[{[...$persistentGrid]}]
 </div>
+
+<style>
+	.columns {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		margin-bottom: 20px;
+	}
+</style>

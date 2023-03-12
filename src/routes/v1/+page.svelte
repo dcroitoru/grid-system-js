@@ -1,9 +1,5 @@
 <script>
-	import Grid from "../../components/Grid.svelte";
-	import Legend from "../../components/Legend.svelte";
-
-
-	
+	import Grid from '../../components/Grid.svelte';
 </script>
 
 <div class="columns">
@@ -11,8 +7,6 @@
 		<h1>Roads Roads Roads</h1>
 		<p>Drag to place roads</p>
 	</div>
-
-	<Legend />
 </div>
 
 <Grid />

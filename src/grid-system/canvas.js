@@ -1,6 +1,6 @@
-import { id, strToArr, toXY } from './util';
 import { context, height, width, gridSize as gs, cellSize as cs } from './store';
 import { tools } from './tools-system';
+import { keyToXY } from './util';
 
 let ctx, w, h, gridSize, cellSize;
 
@@ -16,7 +16,7 @@ const darkBlue = '#073b4c';
 const lightBlue = '#cbf3f0';
 const yellow = '#ffd166';
 
-const colors = {
+export const colors = {
 	default: '#c4f8f8',
 	background: '#fff',
 	'highlight-allow': '#b4b2f1',
@@ -78,7 +78,7 @@ export const drawCell = (cell) => {
 	drawRect(x + b, y + b, cellSize - 2 * b, cellSize - 2 * b, color);
 	drawText(x + cellSize / 2 - 5, y + 15, `${cell.x},${cell.y}`);
 
-	color === colors['highlight-deny'] && drawText(x+21, y + 50, '❌', 20);
+	color === colors['highlight-deny'] && drawText(x + 21, y + 50, '❌', 20);
 };
 
 /**
@@ -86,8 +86,7 @@ export const drawCell = (cell) => {
  * [key, value] => {x, y, data}
  */
 const createCellData = ([key, value]) => {
-	// @ts-ignore
-	const { x, y } = toXY(strToArr(key));
+	const { x, y } = keyToXY(key);
 	const data = value;
 	const color = getCellColor(value);
 	return { x, y, data, color };
